@@ -1,0 +1,16 @@
+export(CausalImpact)
+export(as.CausalImpact)
+
+S3method(summary, CausalImpact)
+S3method(print, CausalImpact)
+S3method(plot, CausalImpact)
+S3method(as.CausalImpact, default)
+
+import(assertthat)
+importFrom(Boom, GammaPrior)
+importFrom(Boom, SdPrior)
+import(bsts)
+import(ggplot2)
+import(stats)
+importFrom(utils, tail)
+import(zoo)
