@@ -1,7 +1,5 @@
 ## ---- eval=FALSE---------------------------------------------------------
-#  install.packages("devtools")
-#  library(devtools)
-#  devtools::install_github("google/CausalImpact")
+#  install.packages("CausalImpact")
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
 library(CausalImpact)
