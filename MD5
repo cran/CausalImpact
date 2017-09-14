@@ -1,4 +1,4 @@
-dbf249d35e84927d6e846aa3ef4c0006 *DESCRIPTION
+44815c766412298c512e7a904a270689 *DESCRIPTION
 2ee41112a44fe7014dce33e26468ba93 *LICENSE
 f85296e8e646714cc1f48c5d04d433a1 *NAMESPACE
 b5c8d6ae70a15f1a3a5d766c385f0bb3 *R/impact_analysis.R
@@ -11,7 +11,7 @@ eebef5fdcec3c76d403796b74ce1473d *build/vignette.rds
 2bb33a6b226516918d1c57b0be18118d *inst/CITATION
 d3ecc37fd96d2943a502e5e73db3575e *inst/doc/CausalImpact.R
 34b4b324d29dec8924fa68e257e89246 *inst/doc/CausalImpact.Rmd
-9e49572074be6c3ecd4d5a91bda0a9eb *inst/doc/CausalImpact.html
+def052140685415bea2f992f17230cbd *inst/doc/CausalImpact.html
 c968f4b11421793ea51b807d8c9e8f3e *man/AsCausalImpact.Rd
 8053df7500eb0823baa1b1f4dfc15678 *man/CausalImpact.Rd
 c16a984fc556637d50149ffa604116a6 *man/CausalImpactMethods.Rd
@@ -19,7 +19,7 @@ efae5ae92999888d542446f158909541 *tests/CausalImpact_import_test.R
 ca3341686b58bee5cbd6ca5c91191e84 *tests/testthat.R
 b019e0eb33f90b8a1b70bd5668e286af *tests/testthat/test-impact-analysis.R
 c8bdb76d082f6739bd7078657315a3eb *tests/testthat/test-impact-inference.R
-d0c3aeabe55840a25b77ec12c1f67d10 *tests/testthat/test-impact-misc.R
+617d9c8cc056e6a372b31e402d21897e *tests/testthat/test-impact-misc.R
 185d02f21589d30302ba1dc29b01d15e *tests/testthat/test-impact-model.R
 667220b02a0510fb8def80bf9d3b07e3 *tests/testthat/test-impact-plot.R
 34b4b324d29dec8924fa68e257e89246 *vignettes/CausalImpact.Rmd
