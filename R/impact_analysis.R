@@ -30,7 +30,8 @@
                   prior.level.sd = 0.01,
                   nseasons = 1,
                   season.duration = 1,
-                  dynamic.regression = FALSE)
+                  dynamic.regression = FALSE,
+                  max.flips = -1)
 
 FormatInputData <- function(data) {
   # Checks and formats the <data> argument provided to CausalImpact().
@@ -70,7 +71,7 @@ FormatInputData <- function(data) {
 
   # Must not have NA in covariates (if any)
   if (ncol(data) >= 2) {
-    assert_that(!anyNA(data[, -1]))
+    assert_that(!anyNA(data[, -1]), msg = "covariates must not have NA values")
   }
 
   # Convert data from integer to double if necessary; this avoids overflow
@@ -300,6 +301,8 @@ CausalImpact <- function(data = NULL,
   #   nseasons:           number of seasons in the seasonal component
   #   season.duration:    duration of each season
   #   dynamic.regression: whether to have dynamic instead of static coefficients
+  #   max.flips:          number of variables to flip in and out of the model on
+  #                       each iteration
   #
   # For more details on all of the above, see the package manual (?CausalImpact)
   # or the vignette.
@@ -379,11 +382,19 @@ RunWithData <- function(data, pre.period, post.period, model.args, alpha) {
   # Returns:
   #   See CausalImpact().
 
+  # Remember original time indices, then clear
+  # Note that this precludes us from benefitting from bsts's ability to fill
+  # missing time points automatically (which can be important when specifying a
+  # seasonal component). In the future, we should stick with the original time
+  # indices and account for the fact that bsts's output may contain additional
+  # time points.
   times <- time(data)
+  time(data) <- seq_len(nrow(data))
 
-  # Zoom in on data in modeling range.
+  # Zoom in on data in modeling range, remove original time indices.
   pre.period[1] <- max(pre.period[1], which.max(!is.na(data[, 1])))
-  data.modeling <- window(data, start = times[pre.period[1]])
+  data.modeling <- window(data, start = pre.period[1])
+  times.modeling <- window(times, start = pre.period[1])
   if (is.null(ncol(data.modeling))) {
     dim(data.modeling) <- c(length(data.modeling), 1)
   }
@@ -398,14 +409,14 @@ RunWithData <- function(data, pre.period, post.period, model.args, alpha) {
   }
 
   # Set observed response after pre-period to NA.
-  window(data.modeling[, 1], start = times[pre.period[2] + 1]) <- NA
+  window(data.modeling[, 1], start = pre.period[2] + 1) <- NA
 
   # Construct model and perform inference
   bsts.model <- ConstructModel(data.modeling, model.args)
 
   # Compile posterior inferences
   if (!is.null(bsts.model)) {
-    y.cf <- window(data[, 1], start = times[pre.period[2] + 1])
+    y.cf <- window(data[, 1], start = pre.period[2] + 1)
     # We need to adapt post-period indices for `CompilePosteriorInferences()` to
     # specify start and end of the post-period relative to pre.period[1], not
     # relative to the start of the time series; `CompilePosteriorInferences()`
@@ -416,6 +427,9 @@ RunWithData <- function(data, pre.period, post.period, model.args, alpha) {
   } else {
     inferences <- CompileNaInferences(data[, 1])
   }
+
+  # Put original time indices back into `inferences$series`
+  time(inferences$series) <- times.modeling
 
   # Extend <series> to cover original range (padding with NA as necessary)
   empty <- zoo(, times)

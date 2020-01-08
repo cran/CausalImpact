@@ -48,7 +48,7 @@ ObservationsAreIllConditioned <- function(y) {
     ill.conditioned <- TRUE
 
   # Fewer than 3 non-NA values?
-  } else if (length(y[!is.na(y)]) < 3) {
+  } else if (sum(!is.na(y)) < 3) {
     warning("Aborting inference due to fewer than 3 non-NA values in input")
     ill.conditioned <- TRUE
 
@@ -141,6 +141,13 @@ FormatInputForConstructModel <- function(data, model.args) {
   assert_that(is.logical(model.args$dynamic.regression))
   assert_that(!is.na(model.args$dynamic.regression))
 
+  # Check <max.flips>
+  assert_that(is.scalar(model.args$max.flips))
+  assert_that(is.numeric(model.args$max.flips))
+  assert_that(!is.na(model.args$max.flips))
+  assert_that(is.wholenumber(model.args$max.flips))
+  assert_that(model.args$max.flips > 0 || model.args$max.flips == -1)
+
   # Return updated args
   return(list(data = data, model.args = model.args))
 }
@@ -204,7 +211,8 @@ ConstructModel <- function(data, model.args = NULL) {
     bsts.model <- bsts(y, state.specification = ss, niter = model.args$niter,
                        seed = 1, ping = 0,
                        model.options =
-                           BstsOptions(save.prediction.errors = TRUE))
+                           BstsOptions(save.prediction.errors = TRUE),
+                       max.flips = model.args$max.flips)
   } else {
     formula <- paste0(names(data)[1], " ~ .")
 
@@ -217,7 +225,8 @@ ConstructModel <- function(data, model.args = NULL) {
                          prior.df = kStaticRegressionPriorDf,
                          niter = model.args$niter, seed = 1, ping = 0,
                          model.options =
-                             BstsOptions(save.prediction.errors = TRUE))
+                             BstsOptions(save.prediction.errors = TRUE),
+                         max.flips = model.args$max.flips)
       time(bsts.model$original.series) <- time(data)
 
     # Dynamic regression?
@@ -228,15 +237,16 @@ ConstructModel <- function(data, model.args = NULL) {
       # variable. We are then using SdPrior to only specify the prior on the
       # residual standard deviation.
       # prior.mean: precision of random walk of coefficients
-      sigma.mean.prior <- GammaPrior(prior.mean = 1, a = 4)
+      sdx <- apply(data[, -1, drop = FALSE], 2, function(x) sd(x, na.rm = TRUE))
+      model.options <- DynamicRegressionRandomWalkOptions(sdx = sdx, sdy = sdy)
       ss <- AddDynamicRegression(ss, formula, data = data,
-                                 sigma.mean.prior = sigma.mean.prior)
+                                 model.options = model.options)
       sd.prior <- SdPrior(sigma.guess = model.args$prior.level.sd * sdy,
                           upper.limit = 0.1 * sdy,
                           sample.size = kDynamicRegressionPriorSampleSize)
       bsts.model <- bsts(y, state.specification = ss, niter = model.args$niter,
                          expected.model.size = 3, ping = 0, seed = 1,
-                         prior = sd.prior)
+                         prior = sd.prior, max.flips = model.args$max.flips)
     }
   }
   return(bsts.model)
