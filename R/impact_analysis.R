@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Google Inc. All rights reserved.
+# Copyright 2014-2022 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@
 #
 # Author: kbrodersen@google.com (Kay Brodersen)
 
-# Specify defaults for <model.args>
-# (should always be in sync with the documentation of CausalImpact())
+# Specify defaults for `model.args`.
+# Should always be in sync with the documentation of `CausalImpact()`.
 .defaults <- list(niter = 1000,
                   standardize.data = TRUE,
                   prior.level.sd = 0.01,
@@ -33,7 +33,7 @@
                   dynamic.regression = FALSE,
                   max.flips = -1)
 
-#' Check and format the \code{data} argument provided to \code{CausalImpact()}
+#' @title Check and format the `data` argument provided to `CausalImpact()`
 #'
 #' @param data A zoo object, a vector, a matrix, or a data frame.
 #'
@@ -46,7 +46,7 @@ FormatInputData <- function(data) {
 
   # If `data` is a data frame and the first column is 'date', try to convert.
   if (is.data.frame(data) && tolower(names(data)[1]) %in% c("date", "time")) {
-    if (class(data$date) == "Date") {
+    if (inherits(data$date, "Date")) {
       data <- zoo(data[, -1], data$date)
     } else {
       warning(paste0("Did you mean: data = zoo(data[, -1], data$",
@@ -58,15 +58,15 @@ FormatInputData <- function(data) {
   data <- TryStop(as.zoo(data), "could not convert input data to zoo object")
   assert_that(is.numeric(data))
 
-  # Ensure <data> is formatted in such a way that rows represent time points
+  # Ensure `data` is formatted in such a way that rows represent time points.
   if (is.null(ncol(data))) {
     dim(data) <- c(length(data), 1)
   }
 
-  # Must have at least 3 time points
+  # Must have at least 3 time points.
   assert_that(nrow(data) > 3)
 
-  # Must not have NA in covariates (if any)
+  # Must not have NA in covariates (if any).
   if (ncol(data) >= 2) {
     assert_that(!anyNA(data[, -1]), msg = "covariates must not have NA values")
   }
@@ -80,7 +80,6 @@ FormatInputData <- function(data) {
                              ncol = ncol(data.matrix),
                              dimnames = dimnames(data.matrix))
   }
-
   return(data)
 }
 
@@ -283,12 +282,15 @@ CausalImpact <- function(data = NULL,
   #     series:  observed data, counterfactual, pointwise and cumulative impact
   #     summary: summary table
   #     report:  verbal description of the analysis
-  #     model:   list with four elements \code{pre.period}, \code{post.period},
-  #              \code{bsts.model} and \code{alpha}. \code{pre.period} and
-  #              \code{post.period} indicate the first and last time point of
-  #              the time series in the respective period, \code{bsts.model} is
-  #              the fitted model returned by \code{bsts()}, and \code{alpha}
-  #              is the user-specified tail-area probability.
+  #     model:   list with five elements \code{pre.period}, \code{post.period},
+  #              \code{bsts.model}, \code{alpha}, and \code{posterior.samples}.
+  #              \code{pre.period} and \code{post.period} indicate the first and
+  #              last time point of the time series in the respective period,
+  #              \code{bsts.model} is the fitted model returned by
+  #              \code{bsts()}, \code{alpha} is the user-specified tail-area
+  #              probability, and \code{posterior.samples} is the
+  #              [n_samples (post burn-in) x n_observations] matrix of posterior
+  #              samples of predicted responses for the whole time period.
   #
   # Optional arguments for model.args:
   #   niter:              number of MCMC iterations
@@ -445,7 +447,8 @@ RunWithData <- function(data, pre.period, post.period, model.args, alpha) {
                 post.period = times[post.period],
                 model.args = model.args,
                 bsts.model = bsts.model,
-                alpha = alpha)
+                alpha = alpha,
+                posterior.samples = inferences$posterior.samples)
   impact <- list(series = inferences$series,
                  summary = inferences$summary,
                  report = inferences$report,
@@ -494,7 +497,8 @@ RunWithBstsModel <- function(bsts.model, post.period.response, alpha = 0.05) {
   model <- list(pre.period = times[indices$pre.period],
                 post.period = times[indices$post.period],
                 bsts.model = bsts.model,
-                alpha = alpha)
+                alpha = alpha,
+                posterior.samples = inferences$posterior.samples)
   impact <- list(series = inferences$series,
                  summary = inferences$summary,
                  report = inferences$report,
