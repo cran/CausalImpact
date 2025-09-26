@@ -1,7 +1,7 @@
-## ---- eval=FALSE--------------------------------------------------------------
-#  install.packages("CausalImpact")
+## ----eval=FALSE---------------------------------------------------------------
+# install.packages("CausalImpact")
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ----message=FALSE, warning=FALSE---------------------------------------------
 library(CausalImpact)
 
 ## -----------------------------------------------------------------------------
@@ -15,10 +15,10 @@ data <- cbind(y, x1)
 dim(data)
 head(data)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  matplot(data, type = "l")
+## ----eval=FALSE---------------------------------------------------------------
+# matplot(data, type = "l")
 
-## ---- echo=FALSE, fig.width=5, fig.height=2.8---------------------------------
+## ----echo=FALSE, fig.width=5, fig.height=2.8----------------------------------
 par(cex = 0.85, oma = c(0, 0, 0, 0), mar = c(3, 2, 1, 1))
 matplot(data, type = "l", lwd = 1.5)
 
@@ -29,13 +29,13 @@ post.period <- c(71, 100)
 ## -----------------------------------------------------------------------------
 impact <- CausalImpact(data, pre.period, post.period)
 
-## ---- fig.width=8, fig.height=6, eval=FALSE-----------------------------------
-#  plot(impact)
+## ----fig.width=8, fig.height=6, eval=FALSE------------------------------------
+# plot(impact)
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 library(ggplot2)
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 q <- plot(impact) + theme_bw(base_size = 11)
 suppressWarnings(plot(q))
 
@@ -48,11 +48,11 @@ head(data)
 pre.period <- as.Date(c("2014-01-01", "2014-03-11"))
 post.period <- as.Date(c("2014-03-12", "2014-04-10"))
 
-## ---- fig.width=8, fig.height=6, eval=FALSE-----------------------------------
-#  impact <- CausalImpact(data, pre.period, post.period)
-#  plot(impact)
+## ----fig.width=8, fig.height=6, eval=FALSE------------------------------------
+# impact <- CausalImpact(data, pre.period, post.period)
+# plot(impact)
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 impact <- CausalImpact(data, pre.period, post.period)
 q <- plot(impact) + theme_bw(base_size = 11)
 suppressWarnings(plot(q))
@@ -60,55 +60,55 @@ suppressWarnings(plot(q))
 ## -----------------------------------------------------------------------------
 summary(impact)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  summary(impact, "report")
+## ----eval=FALSE---------------------------------------------------------------
+# summary(impact, "report")
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  impact$summary
+## ----eval=FALSE---------------------------------------------------------------
+# impact$summary
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  impact <- CausalImpact(..., model.args = list(niter = 5000, nseasons = 7))
+## ----eval=FALSE---------------------------------------------------------------
+# impact <- CausalImpact(..., model.args = list(niter = 5000, nseasons = 7))
 
 ## -----------------------------------------------------------------------------
 post.period <- c(71, 100)
 post.period.response <- y[post.period[1] : post.period[2]]
 y[post.period[1] : post.period[2]] <- NA
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 ss <- AddLocalLevel(list(), y)
 bsts.model <- bsts(y ~ x1, ss, niter = 1000, ping = 0)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  ss <- AddLocalLevel(list(), y)
-#  bsts.model <- bsts(y ~ x1, ss, niter = 1000)
+## ----eval=FALSE---------------------------------------------------------------
+# ss <- AddLocalLevel(list(), y)
+# bsts.model <- bsts(y ~ x1, ss, niter = 1000)
 
 ## -----------------------------------------------------------------------------
 impact <- CausalImpact(bsts.model = bsts.model,
                        post.period.response = post.period.response)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  plot(impact)
-#  summary(impact)
-#  summary(impact, "report")
+## ----eval=FALSE---------------------------------------------------------------
+# plot(impact)
+# summary(impact)
+# summary(impact, "report")
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  plot(impact, c("original", "pointwise"))
+## ----eval=FALSE---------------------------------------------------------------
+# plot(impact, c("original", "pointwise"))
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  library(ggplot2)
-#  impact.plot <- plot(impact) + theme_bw(base_size = 20)
-#  plot(impact.plot)
+## ----eval=FALSE---------------------------------------------------------------
+# library(ggplot2)
+# impact.plot <- plot(impact) + theme_bw(base_size = 20)
+# plot(impact.plot)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  impact <- CausalImpact(data, pre.period, post.period, alpha = 0.1)
+## ----eval=FALSE---------------------------------------------------------------
+# impact <- CausalImpact(data, pre.period, post.period, alpha = 0.1)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  plot(impact$model$bsts.model, "coefficients")
+## ----eval=FALSE---------------------------------------------------------------
+# plot(impact$model$bsts.model, "coefficients")
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  ?BoomSpikeSlab::PlotMarginalInclusionProbabilities
+## ----eval=FALSE---------------------------------------------------------------
+# ?BoomSpikeSlab::PlotMarginalInclusionProbabilities
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 # Get authors and copyright information.
 description <- packageDescription("CausalImpact")
 authors.markdown <- paste(format(as.person(description$Author),
